@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy import Column, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from pydantic import BaseModel, EmailStr
@@ -18,15 +19,15 @@ class User(Base):
 class UserCreate(BaseModel):
     name: str
     email: EmailStr
-    organisation: str | None = None
-    position: str | None = None
+    organisation: Optional[str] = None
+    position: Optional[str] = None
 
 class UserResponse(BaseModel):
     userID: int
     name: str
     email: EmailStr
-    organisation: str | None = None
-    position: str | None = None
+    organisation: Optional[str] = None
+    position: Optional[str] = None
 
     class Config:
         orm_mode = True # Compatibility with SQLAlchemy models
