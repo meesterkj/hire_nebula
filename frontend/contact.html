@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Nebula</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F4F8; /* Light gray/blue for background */
+            color: #334E68; /* Darker blue for text */
+        }
+        .container-bg {
+            background-color: #E0E6EE; /* Muted blue/gray for section background */
+        }
+        .button-primary {
+            background-color: #6C91B7; /* Soft blue for button */
+            transition: background-color 0.3s ease;
+        }
+        .button-primary:hover {
+            background-color: #4A6B8A; /* Darker blue on hover */
+        }
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            border: 1px solid #A2B9CD; /* Muted border for inputs */
+            background-color: #F8F9FA; /* Very light background for inputs */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-3xl mx-auto p-8 rounded-lg shadow-xl container-bg">
+        <h1 class="text-5xl md:text-6xl font-bold text-center mb-8 text-[#4A6B8A]">Contact Nebula</h1>
+
+        <p class="text-center text-lg md:text-xl mb-10 text-[#5D7E9D]">
+            Have a question, a project idea, or just want to say hello? I'd love to hear from you!
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+                <h2 class="text-3xl font-semibold mb-6 text-[#4A6B8A]">Get in Touch</h2>
+                <ul class="space-y-4 text-lg text-[#5D7E9D]">
+                    <li>
+                        <i class="fas fa-envelope mr-3 text-[#6C91B7]"></i> Email: <a href="mailto:contact@nebula.com" class="hover:underline">contact@nebula.com</a>
+                    </li>
+                    <li>
+                        <i class="fas fa-phone mr-3 text-[#6C91B7]"></i> Phone: +1 (123) 456-7890
+                    </li>
+                    <li>
+                        <i class="fas fa-map-marker-alt mr-3 text-[#6C91B7]"></i> Location: Your City, Your Country
+                    </li>
+                </ul>
+                <div class="mt-8">
+                    <h3 class="text-2xl font-semibold mb-4 text-[#4A6B8A]">Connect on Socials</h3>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-[#6C91B7] hover:text-[#4A6B8A] transition-colors duration-200 text-3xl">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="#" class="text-[#6C91B7] hover:text-[#4A6B8A] transition-colors duration-200 text-3xl">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="text-[#6C91B7] hover:text-[#4A6B8A] transition-colors duration-200 text-3xl">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+                <h2 class="text-3xl font-semibold mb-6 text-[#4A6B8A]">Send a Message</h2>
+                <form action="#" method="post" class="space-y-6">
+                    <div>
+                        <label for="contact-name" class="block text-sm font-medium text-[#5D7E9D] mb-1">Name:</label>
+                        <input type="text" id="contact-name" name="name" placeholder="Your Name"
+                               class="mt-1 block w-full px-4 py-2 rounded-md focus:ring-2 focus:ring-[#6C91B7] focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="contact-email" class="block text-sm font-medium text-[#5D7E9D] mb-1">Email:</label>
+                        <input type="email" id="contact-email" name="email" placeholder="Your Email"
+                               class="mt-1 block w-full px-4 py-2 rounded-md focus:ring-2 focus:ring-[#6C91B7] focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-[#5D7E9D] mb-1">Message:</label>
+                        <textarea id="message" name="message" rows="5" placeholder="Your message..."
+                                  class="mt-1 block w-full px-4 py-2 rounded-md focus:ring-2 focus:ring-[#6C91B7] focus:border-transparent"></textarea>
+                    </div>
+                    <div class="text-center pt-4">
+                        <button type="submit"
+                                class="button-primary text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#6C91B7] focus:ring-opacity-50">
+                            Send Message
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <p class="text-center text-sm mt-10 text-[#889AA4]">&copy; 2025 Nebula. All rights reserved.</p>
+    </div>
+</body>
+</html>
