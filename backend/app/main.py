@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from typing import List, Dict, Optional
 
 from . import models
+from pydantic import BaseModel
 # Removed SQLAlchemy imports: SessionLocal, engine, create_db_and_tables, get_db
 # Removed sqlalchemy.orm.Session import
 from .services import chat_service # Imports the whole module
