@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from typing import List, Dict, Optional
 
@@ -42,6 +43,15 @@ async def lifespan(app: FastAPI):
     print("Application shutdown...")
 
 app = FastAPI(lifespan=lifespan)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 @app.post("/chat/start", response_model=models.UserResponse)
 def start_chat(user_data: models.UserCreate): # Removed db: Session = Depends(get_db)
