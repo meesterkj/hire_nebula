@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env # Optional: if you have a .env file in the backend directory
+    # command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload # Optional: if you want to override the Dockerfile CMD
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80" # Map host port 3000 to container port 80 (where Nginx serves)
+    volumes:
+      - ./frontend/src:/app/src # Optional: if you want live reloading for frontend development
+    depends_on:
+      - backend
