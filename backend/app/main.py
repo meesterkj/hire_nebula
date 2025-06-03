@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from . import models
-from .database import SessionLocal, engine, create_db_and_tables, get_db
+# Removed SQLAlchemy imports: SessionLocal, engine, create_db_and_tables, get_db
+# Removed sqlalchemy.orm.Session import
 from .services import chat_service # Imports the whole module
 from .core.config import settings # For API key check before init
 
@@ -15,14 +15,16 @@ from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 # In a production app, this should be a more persistent store (Redis, DB, etc.)
 chat_histories: Dict[str, List[BaseMessage]] = {}
 
+# In-memory storage for users (email -> User model)
+in_memory_users_db: Dict[str, models.User] = {}
+next_user_id: int = 1
+# import threading # For future thread safety if needed
+# user_id_lock = threading.Lock()
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Application startup...")
-    try:
-        create_db_and_tables()
-        print("Database tables checked/created (if DB is accessible).")
-    except Exception as e:
-        print(f"Database table creation failed (this is expected if DB is not running): {e}")
+    # Removed create_db_and_tables() call
 
     # Initialize PDF processing and vector store
     chat_service.load_and_process_pdfs()
@@ -41,44 +43,37 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 @app.post("/chat/start", response_model=models.UserResponse)
-def start_chat(user_data: models.UserCreate, db: Session = Depends(get_db)):
-    # db_user = db.query(models.User).filter(models.User.email == user_data.email).first()
-    # For this version, we are creating a new user or erroring if email exists.
-    # Let's adjust to: if user exists by email, return their ID. Otherwise, create.
-    existing_user = db.query(models.User).filter(models.User.email == user_data.email).first()
-    if existing_user:
-        # User exists, return their info
-        print(f"Existing user found: {existing_user.id}")
+def start_chat(user_data: models.UserCreate): # Removed db: Session = Depends(get_db)
+    global next_user_id, in_memory_users_db
+
+    if user_data.email in in_memory_users_db:
+        existing_user = in_memory_users_db[user_data.email]
+        print(f"Existing user found: {existing_user.userID}")
+        # Ensure all fields are populated for the response
         return models.UserResponse(
-            userID=existing_user.id,
+            userID=existing_user.userID,
             name=existing_user.name,
             email=existing_user.email,
             organisation=existing_user.organisation,
             position=existing_user.position
         )
 
+    # with user_id_lock: # If using threading.Lock
+    current_id = next_user_id
+    next_user_id += 1
+
     new_user = models.User(
+        userID=current_id, # Assign the new userID
         name=user_data.name,
         email=user_data.email,
         organisation=user_data.organisation,
         position=user_data.position
     )
-    try:
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-    except Exception as e:
-        db.rollback()
-        print(f"Error saving user to DB: {e}")
-        raise HTTPException(status_code=500, detail=f"Could not save user to database: {e}")
+    in_memory_users_db[new_user.email] = new_user
+    print(f"New user created with ID: {new_user.userID}")
 
-    if new_user.id is None: # Should not happen with autoincrement if DB is working
-        print("User ID is None after commit. Placeholder ID returned.")
-        return models.UserResponse(userID=-1, name=new_user.name, email=new_user.email, organisation=new_user.organisation, position=new_user.position)
-
-    print(f"New user created with ID: {new_user.id}")
     return models.UserResponse(
-        userID=new_user.id,
+        userID=new_user.userID,
         name=new_user.name,
         email=new_user.email,
         organisation=new_user.organisation,
@@ -111,7 +106,7 @@ def convert_messages_to_dict(messages: List[BaseMessage]) -> List[Dict]:
     return output
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
+async def chat_endpoint(request: ChatRequest): # Removed db: Session = Depends(get_db)
     user_id_str = str(request.userId)
     user_message_content = request.message
 
