@@ -19,6 +19,8 @@ from langchain_experimental.pydantic_v1 import BaseModel, Field # Use v1 for Lan
 from ..core.config import settings
 import glob
 
+import getpass
+
 # --- PDF Processing and Vector Store (from previous step) ---
 vector_store_instance: Optional[FAISS] = None
 
@@ -45,7 +47,7 @@ def load_and_process_pdfs():
 
         if not all_docs: documents = []
         else:
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=600, chunk_overlap=200)
             documents = text_splitter.split_documents(all_docs)
             print(f"Split into {len(documents)} chunks.")
 
@@ -131,12 +133,18 @@ def llm_call_node(state: GraphState):
     print("---NODE: Calling LLM---")
     # Construct prompt
     system_prompt_template = (
-        "You are Nebula's AI assistant. Your goal is to help users get to know Nebula better. "
-        "You should be friendly, helpful, and informative. "
-        "Use the provided context from Nebula's documents and any job description to answer questions. "
+        "You are Nebula's AI assistant, speaking to a prospective hiring manager or engineering. Your goal is to help Nebula get the job by brining forward relevant information from the context and job description."
+        "You should be friendly, helpful, and informative. Always be confident in Nebula's abilities and experiences."
+        "Maintain a confident tone that Nebula will be a great hire for the job, backing up your statements with some meaningful reasons."
+        "Nebula is an AI Engieer, with 13 years of experience at the intersection of AI and software engineering. For more context, look up Nebula's document."
+        "Use relevant technologies, skills and experiences from Nebula's documents to convince the user why Nebula would be a good hire."
+        "Use the provided context from Nebula's documents and any job description to answer questions."
+        "If asked about any particular technology, skill or experience, use the context to provide detailed answer, specifically focusing on any experience and results achieved."
         "If you are asked to look up a job description from a URL, use the 'fetch_job_description_content' tool. "
         "Do not make up information if it's not in the context or job description. "
+        "If there isn't great amount of overlap between the job description and Nebula's documents, you should focus on transferable skills which are common between the roles and can say that Nebula is a quick learner and can adapt to new technologies and skills."
         "If you don't know the answer, say so. "
+        "Keep your answers to 100 to 200 tokents, unless the user asks for more details or a longer answer."
         "Relevant context from Nebula's documents:\n{context}\n\n"
         "Job description (if provided by user and fetched):\n{job_description}\n\n"
         "Begin!"
@@ -154,7 +162,7 @@ def llm_call_node(state: GraphState):
         if tool_outputs_str:
              job_desc_str = tool_outputs_str # Or combine with previous job_url content if any
 
-    current_prompt = ChatPromptTemplate.from_messages([
+    current_prompt = ChatPromptTemplate.from_messages([ # Last user message
         SystemMessage(content=system_prompt_template.format(context=context_str, job_description=job_desc_str)),
         MessagesPlaceholder(variable_name="messages") # For history and current tool messages
     ])
@@ -162,6 +170,7 @@ def llm_call_node(state: GraphState):
     if state.get("tool_invocations"):
         current_prompt = current_prompt = ChatPromptTemplate.from_messages([
         SystemMessage(content=system_prompt_template.format(context=context_str, job_description=job_desc_str)),
+        MessagesPlaceholder(variable_name="messages") # For history and current tool messages
     ])
 
     # Initialize LLM with tools
@@ -227,7 +236,7 @@ def tool_node(state: GraphState) -> dict:
             )
 
     print(f"Tool invocation results: {tool_invocations_results}")
-    return {"tool_invocations": tool_invocations_results}
+    return {"messages": state["messages"] + tool_invocations_results}
 
 
 # --- Conditional Edges ---
@@ -247,7 +256,8 @@ class ChatService:
     def __init__(self):
         self.graph = self._build_graph()
 
-    def _build_graph(self):
+    def _build_graph(self): # Set LangChain endpoint if needed
+
         graph_builder = StateGraph(GraphState)
 
         graph_builder.add_node("retrieve_docs", retrieve_documents_node)

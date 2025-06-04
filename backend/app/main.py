@@ -33,8 +33,8 @@ async def lifespan(app: FastAPI):
     print("PDF processing attempted.")
 
     # Initialize ChatService (which builds the LangGraph)
-    if not settings.GOOGLE_API_KEY or settings.GOOGLE_API_KEY == "your_google_api_key_here":
-        print("CRITICAL WARNING: GOOGLE_API_KEY is not set in environment or .env file.")
+    if not settings.ANTHROPIC_API_KEY or settings.ANTHROPIC_API_KEY == "your_anthropic_api_key_here":
+        print("CRITICAL WARNING: ANTHROPIC_API_KEY is not set in environment or .env file.")
         print("Chat functionality will be severely impaired or non-functional.")
     chat_service.initialize_chat_service()
     print("Chat service initialized.")

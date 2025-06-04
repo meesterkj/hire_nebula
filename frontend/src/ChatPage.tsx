@@ -39,7 +39,7 @@ const ChatPage: React.FC = () => {
   // Initial AI Greeting
   useEffect(() => {
     setMessages([
-      { id: Date.now().toString(), text: "Hi there! I'm Nebula's AI assistant. How can I help you get to know Nebula better today?", sender: 'ai', timestamp: new Date() }
+      { id: Date.now().toString(), text: "Hi there! I'm Nebula's AI cheerleader. You may say that I am \"Agentic\", but still quite limited in what I can do. <br> How can I help you get to know Nebula better today? <br><br> You can ask me about Nebula's skills, passion and past experiences, which I will Retrieve from his CV supplied to me in pdf format, chunked and stored in an in-memory VectorDB. I RETRIEVE, BABY! WOOHOO <br><br> You can also pass me an URL to job description on websites, which I will fetch through tool calling and help you understand how Nebula might be able to help you. OUF, I'm so freaking AGENTIC! <br><br> Ask me something about Nebula to get started.", sender: 'ai', timestamp: new Date() }
     ]);
   }, []);
 
@@ -132,7 +132,11 @@ const ChatPage: React.FC = () => {
                               : 'bg-green-100 self-start rounded-bl-lg'
                             }`}
               >
-                {msg.text}
+                {msg.sender === 'ai' ? (
+                  <span dangerouslySetInnerHTML={{ __html: msg.text }} />
+                ) : (
+                  msg.text
+                )}
               </div>
             ))}
           </div>
