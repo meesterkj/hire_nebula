@@ -5,7 +5,8 @@ from operator import itemgetter
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+from langchain_anthropic import ChatAnthropic # Added ChatAnthropic
+from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, ToolMessage, SystemMessage
@@ -54,10 +55,10 @@ def load_and_process_pdfs():
         return None
 
     try:
-        print(f"Initializing GoogleEmbeddings with API key: {settings.GOOGLE_API_KEY[:15]}...")
-        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=settings.GOOGLE_API_KEY)
+        print(f"Initializing OpenAIEmbeddings with API key...") # Updated print
+        embeddings = OpenAIEmbeddings(model="text-embedding-ada-002", openai_api_key=settings.OPENAI_API_KEY) # Changed to OpenAIEmbeddings
         vector_store_instance = FAISS.from_documents(documents, embeddings)
-        print("FAISS vector store created.")
+        print("FAISS vector store created with OpenAI embeddings.") # Updated print
     except Exception as e:
         print(f"Error during embedding or FAISS creation: {e}")
         vector_store_instance = None
@@ -164,17 +165,16 @@ def llm_call_node(state: GraphState):
     ])
 
     # Initialize LLM with tools
-    # Ensure GOOGLE_API_KEY is available
-    if not settings.GOOGLE_API_KEY or settings.GOOGLE_API_KEY == "your_google_api_key_here":
-        print("ERROR: GOOGLE_API_KEY not configured. LLM call will fail.")
+    # Ensure ANTHROPIC_API_KEY is available
+    if not settings.ANTHROPIC_API_KEY or settings.ANTHROPIC_API_KEY == "your_anthropic_api_key_here": # Updated for Anthropic
+        print("ERROR: ANTHROPIC_API_KEY not configured. LLM call will fail.") # Updated for Anthropic
         # Return a message indicating this failure.
         ai_response = AIMessage(content="I cannot process your request right now as my connection to the language model is not configured (API key missing). Please contact support.")
         return {"messages": state["messages"] + [ai_response]}
 
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
-        google_api_key=settings.GOOGLE_API_KEY,
-        convert_system_message_to_human=True # Gemini API prefers this for some models/setups
+    llm = ChatAnthropic( # Changed to ChatAnthropic
+        model="claude-3-haiku-20240307", # Changed model
+        anthropic_api_key=settings.ANTHROPIC_API_KEY # Changed API key
     )
     llm_with_tools = llm.bind_tools([fetch_website_content], tool_choice=None) # None means LLM decides
 
@@ -310,8 +310,13 @@ chat_service_instance: Optional[ChatService] = None
 
 def initialize_chat_service():
     global chat_service_instance
-    if not settings.GOOGLE_API_KEY or settings.GOOGLE_API_KEY == "your_google_api_key_here":
-        print("WARNING: GOOGLE_API_KEY is not set. Chat service LLM calls will fail.")
+    # Updated to check for ANTHROPIC_API_KEY as it's now the primary LLM
+    if not settings.ANTHROPIC_API_KEY or settings.ANTHROPIC_API_KEY == "your_anthropic_api_key_here":
+        print("WARNING: ANTHROPIC_API_KEY is not set. Chat service LLM calls will likely fail.")
+        # We can still initialize the service, but it will return errors.
+    elif not settings.GOOGLE_API_KEY or settings.GOOGLE_API_KEY == "your_google_api_key_here":
+        # This is a secondary warning, as Google API might be used by other parts or future features
+        print("WARNING: GOOGLE_API_KEY is not set. Some functionalities might be affected if they rely on Google services directly.")
         # We can still initialize the service, but it will return errors.
 
     # Ensure vector store is loaded before ChatService initialization if it depends on it
