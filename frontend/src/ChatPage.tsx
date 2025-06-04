@@ -56,21 +56,44 @@ const ChatPage: React.FC = () => {
     const userMessage: Message = { id: Date.now().toString(), text: inputValue, sender: 'user', timestamp: new Date() };
     setMessages(prevMessages => [...prevMessages, userMessage]);
 
-    const currentInput = inputValue;
     setInputValue('');
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse: Message = { id: (Date.now() + 1).toString(), text: `Nebula AI: You said "${currentInput}". I'm still learning!`, sender: 'ai', timestamp: new Date() };
-      setMessages(prevMessages => [...prevMessages, aiResponse]);
-    }, 1000);
-
-    // Actual API call (commented out)
-    /*
-    fetch('/api/chat/message', { ... })
-    .then(...)
-    .catch(...);
-    */
+    // Actual API call
+    fetch('http://localhost:8000/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: userMessage.text }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.ai_response) {
+        const aiResponse: Message = { id: (Date.now() + 1).toString(), text: data.ai_response, sender: 'ai', timestamp: new Date() };
+        setMessages(prevMessages => [...prevMessages, aiResponse]);
+      } else {
+        console.error('AI response not found in data:', data);
+        const errorResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          text: "Sorry, I received an unexpected response from the AI. Please try again later.",
+          sender: 'ai',
+          timestamp: new Date()
+        };
+        setMessages(prevMessages => [...prevMessages, errorResponse]);
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching AI response:', error);
+      // Optionally, handle this case in the UI, e.g., show an error message
+      // For example, you could add a message to the chat indicating the error:
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "Sorry, I couldn't connect to the AI. Please try again later.",
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      setMessages(prevMessages => [...prevMessages, errorResponse]);
+    });
   };
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
