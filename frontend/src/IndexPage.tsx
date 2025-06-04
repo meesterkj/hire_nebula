@@ -24,7 +24,7 @@ const IndexPage: React.FC = () => {
     }
 
     // API Call
-    fetch('/api/chat/start', {
+    fetch('http://localhost:8000/api/chat/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, organisation, position }),

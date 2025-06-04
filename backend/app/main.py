@@ -53,7 +53,7 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-@app.post("/chat/start", response_model=models.UserResponse)
+@app.post("/api/chat/start", response_model=models.UserResponse)
 def start_chat(user_data: models.UserCreate): # Removed db: Session = Depends(get_db)
     global next_user_id, in_memory_users_db
 
@@ -116,7 +116,7 @@ def convert_messages_to_dict(messages: List[BaseMessage]) -> List[Dict]:
         # ToolMessage is not directly shown to user, it's part of the AI's internal thought process
     return output
 
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/api/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest): # Removed db: Session = Depends(get_db)
     user_id_str = str(request.userId)
     user_message_content = request.message

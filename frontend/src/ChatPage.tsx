@@ -64,12 +64,12 @@ const ChatPage: React.FC = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message: userMessage.text }),
+      body: JSON.stringify({ userId: 1, message: userMessage.text }),
     })
     .then(response => response.json())
     .then(data => {
-      if (data.ai_response) {
-        const aiResponse: Message = { id: (Date.now() + 1).toString(), text: data.ai_response, sender: 'ai', timestamp: new Date() };
+      if (data.response) {
+        const aiResponse: Message = { id: (Date.now() + 1).toString(), text: data.response, sender: 'ai', timestamp: new Date() };
         setMessages(prevMessages => [...prevMessages, aiResponse]);
       } else {
         console.error('AI response not found in data:', data);

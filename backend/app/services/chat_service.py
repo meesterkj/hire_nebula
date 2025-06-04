@@ -27,7 +27,7 @@ def load_and_process_pdfs():
         print("Vector store already initialized.")
         return vector_store_instance
 
-    pdf_directory = "backend/pdf/"
+    pdf_directory = "pdf/"
     pdf_files = glob.glob(os.path.join(pdf_directory, "*.pdf"))
     if not pdf_files:
         print("No PDF files found. Vector store will be empty or not initialized.")
@@ -88,7 +88,7 @@ def fetch_website_content(url: str) -> str:
             # For now, assume it's mostly text or use response.text directly.
             # Let's try to get text, might need a more sophisticated parser for complex HTML.
             # For now, just returning .text is fine.
-            print(f"Successfully fetched content from {url}.")
+            print(f"Successfully fetched content from {url}.") # Get text with newlines for readability
             return response.text
     except httpx.HTTPStatusError as e:
         print(f"HTTP error fetching {url}: {e.response.status_code} - {e.response.text}")
@@ -158,6 +158,11 @@ def llm_call_node(state: GraphState):
         MessagesPlaceholder(variable_name="messages") # For history and current tool messages
     ])
 
+    if state.get("tool_invocations"):
+        current_prompt = current_prompt = ChatPromptTemplate.from_messages([
+        SystemMessage(content=system_prompt_template.format(context=context_str, job_description=job_desc_str)),
+    ])
+
     # Initialize LLM with tools
     # Ensure GOOGLE_API_KEY is available
     if not settings.GOOGLE_API_KEY or settings.GOOGLE_API_KEY == "your_google_api_key_here":
@@ -167,7 +172,7 @@ def llm_call_node(state: GraphState):
         return {"messages": state["messages"] + [ai_response]}
 
     llm = ChatGoogleGenerativeAI(
-        model="gemini-pro",
+        model="gemini-2.0-flash",
         google_api_key=settings.GOOGLE_API_KEY,
         convert_system_message_to_human=True # Gemini API prefers this for some models/setups
     )
