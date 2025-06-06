@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './Sidebar'; // Import Sidebar
 import { Message } from './models'; // Assuming Message interface might be shared
+import { v4 as uuidv4 } from 'uuid'; // Added uuid import
 
 // If Message is not shared, define it here:
 // interface Message {
@@ -14,8 +15,19 @@ const ChatPage: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
   const chatHistoryRef = useRef<HTMLDivElement>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for sidebar
+  const [userId, setUserId] = useState<string | null>(null); // Added userId state
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen); // Toggle function
+
+  // Effect for userId initialization
+  useEffect(() => {
+    let storedUserId = localStorage.getItem('userId');
+    if (!storedUserId) {
+      storedUserId = uuidv4();
+      localStorage.setItem('userId', storedUserId);
+    }
+    setUserId(storedUserId);
+  }, []);
 
   // Effect for body overflow
   useEffect(() => {
@@ -59,12 +71,26 @@ const ChatPage: React.FC = () => {
     setInputValue('');
 
     // Actual API call
+    if (!userId) {
+      console.error("User ID not set, cannot send message.");
+      // Optionally, show an error to the user or queue the message.
+      // For now, just preventing the call.
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "Error: User session not properly initialized. Please refresh the page.",
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      setMessages(prevMessages => [...prevMessages, errorResponse]);
+      return;
+    }
+
     fetch('http://localhost:8000/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userId: 1, message: userMessage.text }),
+      body: JSON.stringify({ userId: userId, message: userMessage.text }), // Used userId state
     })
     .then(response => response.json())
     .then(data => {
