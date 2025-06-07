@@ -2,8 +2,7 @@ fastapi
 uvicorn[standard]
 python-dotenv
 langchain
-langchain-anthropic
-langchain-openai
+langchain_google_genai
 langgraph
 faiss-cpu
 pypdf
@@ -12,5 +11,3 @@ langchain-community
 httpx
 langchain-experimental
 pydantic[email]
-anthropic>=0.20.0
-openai>=1.12.0

@@ -33,8 +33,8 @@ async def lifespan(app: FastAPI):
     print("PDF processing attempted.")
 
     # Initialize ChatService (which builds the LangGraph)
-    if not settings.ANTHROPIC_API_KEY or settings.ANTHROPIC_API_KEY == "your_anthropic_api_key_here":
-        print("CRITICAL WARNING: ANTHROPIC_API_KEY is not set in environment or .env file.")
+    if not settings.GOOGLE_API_KEY or settings.GOOGLE_API_KEY == "your_google_api_key_here":
+        print("CRITICAL WARNING: GOOGLE_API_KEY is not set in environment or .env file.")
         print("Chat functionality will be severely impaired or non-functional.")
     chat_service.initialize_chat_service()
     print("Chat service initialized.")
@@ -74,7 +74,7 @@ def start_chat(user_data: models.UserCreate): # Removed db: Session = Depends(ge
     next_user_id += 1
 
     new_user = models.User(
-        userID=current_id, # Assign the new userID
+        userID=str(current_id), # Assign the new userID
         name=user_data.name,
         email=user_data.email,
         organisation=user_data.organisation,
@@ -94,7 +94,7 @@ def start_chat(user_data: models.UserCreate): # Removed db: Session = Depends(ge
 # Pydantic model for /chat request
 class ChatRequest(BaseModel):
     message: str
-    userId: int # Changed from userID to userId to match frontend examples if any, stick to camelCase
+    userId: str # Changed from userID to userId to match frontend examples if any, stick to camelCase
 
 class ChatResponse(BaseModel):
     response: str

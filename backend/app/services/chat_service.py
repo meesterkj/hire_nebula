@@ -145,6 +145,7 @@ def llm_call_node(state: GraphState):
         "If there isn't great amount of overlap between the job description and Nebula's documents, you should focus on transferable skills which are common between the roles and can say that Nebula is a quick learner and can adapt to new technologies and skills."
         "If you don't know the answer, say so. "
         "Keep your answers to 100 to 200 tokents, unless the user asks for more details or a longer answer."
+        "You should also know that Nebula has built you - an AI assistant with a RAG (retrieval-augmented generation) system to fetch data from his pdf cv, stored in a FAISS vector database. You should also know that Nebula has built you as an Agentic AI, capable to fetching data from external webpages."
         "Relevant context from Nebula's documents:\n{context}\n\n"
         "Job description (if provided by user and fetched):\n{job_description}\n\n"
         "Begin!"
@@ -182,7 +183,7 @@ def llm_call_node(state: GraphState):
         return {"messages": state["messages"] + [ai_response]}
 
     llm = ChatGoogleGenerativeAI( # Reverted to ChatGoogleGenerativeAI
-        model="gemini-pro", # Reverted model
+        model="gemini-2.0-flash", # Reverted model
         google_api_key=settings.GOOGLE_API_KEY, # Reverted API key
         convert_system_message_to_human=True # Reinstated
     )

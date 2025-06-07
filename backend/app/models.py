@@ -4,7 +4,7 @@ from typing import Optional
 
 # Pydantic model for in-memory storage
 class User(BaseModel):
-    userID: int
+    userID: str
     name: str
     email: EmailStr
     organisation: Optional[str] = None
@@ -18,7 +18,7 @@ class UserCreate(BaseModel):
     position: Optional[str] = None
 
 class UserResponse(BaseModel):
-    userID: int
+    userID: str
     name: str
     email: EmailStr
     organisation: Optional[str] = None
